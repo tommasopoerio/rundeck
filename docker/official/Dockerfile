@@ -31,13 +31,6 @@ RUN set -euxo pipefail \
     && addgroup rundeck sudo \
     && chmod g+w /etc/passwd
 
-# Add Tini
-ENV TINI_VERSION v0.19.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /tini.asc
-RUN gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
- && gpg --batch --verify /tini.asc /tini
-RUN chmod +x /tini
 
 RUN curl --request GET -sL \
     --url 'https://github.com/HeavyHorst/remco/releases/download/v0.12.3/remco_0.12.3_linux_amd64.zip'\
@@ -75,4 +68,4 @@ RUN chmod -R 0775 etc
 VOLUME ["/home/rundeck/server/data"]
 
 EXPOSE 4440
-ENTRYPOINT [ "/tini", "--", "docker-lib/entry.sh" ]
+ENTRYPOINT [ "/bin/sh", "docker-lib/entry.sh" ]
