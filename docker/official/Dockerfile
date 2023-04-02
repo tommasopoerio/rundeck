@@ -23,6 +23,7 @@ RUN set -euxo pipefail \
         uuid-runtime \
         wget \
         unzip \
+        ansible \
     && rm -rf /var/lib/apt/lists/* \
     # Setup rundeck user
     && adduser --gid 0 --shell /bin/bash --home /home/rundeck --gecos "" --disabled-password rundeck \
@@ -31,13 +32,14 @@ RUN set -euxo pipefail \
     && addgroup rundeck sudo \
     && chmod g+w /etc/passwd
 
-
+#remco build 
 RUN curl --request GET -sL \
-    --url 'https://github.com/HeavyHorst/remco/releases/download/v0.12.3/remco_0.12.3_linux_amd64.zip'\
-    --output 'remco.zip'
-RUN echo '45f7073e02ce967e9bdc1e4f4a0b5c52b48a3085be4c2b9d04c912f839439c24  remco.zip' > remco.zip.sha
-RUN sha256sum -c remco.zip.sha
-RUN unzip remco.zip && cp remco_linux /usr/local/bin/remco
+    --url 'https://github.com/tommasopoerio/remco/releases/download/v0.12.3/remco_0.12.3_linux_arm64.tar.gz'\
+    --output 'remco.tar.gz'
+RUN echo 'c206c5887f7252721b5ddf383e081c66fa51500a5ec2ca77c6be44f2fa12c70d  remco.tar.gz' > remco.tar.gz.sha
+RUN sha256sum -c remco.tar.gz.sha
+RUN tar xzvf remco.tar.gz  && cp remco_linux /usr/local/bin/remco
+
 
 USER rundeck
 
@@ -49,6 +51,9 @@ USER root
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get clean
+
+#RUN apt-get install -y libc6 libc-bin
+
 
 USER rundeck
 
@@ -62,6 +67,7 @@ RUN java -jar rundeck.war --installonly \
 COPY --chown=rundeck:root remco /etc/remco
 COPY --chown=rundeck:root lib docker-lib
 COPY --chown=rundeck:root etc etc
+
 
 RUN chmod -R 0775 etc
 
